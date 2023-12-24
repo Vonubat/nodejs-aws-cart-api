@@ -14,8 +14,8 @@ const stack = new AwsCdkStack(app, 'CartApiStack', {
   env: { region },
 });
 
-const api = new RestApi(stack, 'CartLambdaApi', {
-  restApiName: 'CartLambdaApi',
+const api = new RestApi(stack, 'CartApi', {
+  restApiName: 'CartApi',
   defaultCorsPreflightOptions: {
     allowOrigins: Cors.ALL_ORIGINS,
     allowHeaders: Cors.DEFAULT_HEADERS,
