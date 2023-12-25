@@ -4,6 +4,7 @@ import { CartItemEntity } from '../db/entities/cart-item.entity';
 import { CartEntity } from '../db/entities/cart.entity';
 
 ConfigModule.forRoot();
+import 'dotenv/config';
 
 const { NODE_ENV, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } =
   process.env;

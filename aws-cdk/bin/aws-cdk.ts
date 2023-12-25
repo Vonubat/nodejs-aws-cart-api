@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import { App } from 'aws-cdk-lib';
+import { App, Duration } from 'aws-cdk-lib';
 import { LambdaIntegration, RestApi, Cors } from 'aws-cdk-lib/aws-apigateway';
 import { Runtime, Code, Function } from 'aws-cdk-lib/aws-lambda';
 import { AwsCdkStack } from '../lib/aws-cdk-stack';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { resolve } from 'path';
 import 'dotenv/config';
 
@@ -36,12 +37,13 @@ const cartApiLambda = new Function(stack, 'CartApiLambda', {
   runtime: Runtime.NODEJS_18_X,
   handler: 'main.handler',
   environment: {
-    dbHost,
-    dbName,
-    dbPassword,
-    dbPort,
-    dbUser,
+    DB_HOST: dbHost,
+    DB_NAME: dbName,
+    DB_PORT: dbPort,
+    DB_USER: dbUser,
+    DB_PASSWORD: dbPassword,
   },
+  timeout: Duration.seconds(5),
 });
 
 const cartApiIntegration = new LambdaIntegration(cartApiLambda, {

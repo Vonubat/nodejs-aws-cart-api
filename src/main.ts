@@ -23,7 +23,7 @@ async function bootstrap() {
     });
 
     app.use(helmet());
-    await app.listen(port);
+    await app.init();
 
     cachedServer = serverlessExpress({ app: expressApp });
   }
