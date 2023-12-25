@@ -7,7 +7,15 @@ import { AwsCdkStack } from '../lib/aws-cdk-stack';
 import { resolve } from 'path';
 import 'dotenv/config';
 
-import { HttpMethod, region } from '../src/constants';
+import {
+  HttpMethod,
+  region,
+  dbHost,
+  dbName,
+  dbPassword,
+  dbPort,
+  dbUser,
+} from '../src/constants';
 
 const app = new App();
 const stack = new AwsCdkStack(app, 'CartApiStack', {
@@ -27,6 +35,13 @@ const cartApiLambda = new Function(stack, 'CartApiLambda', {
   code: Code.fromAsset(resolve('dist')),
   runtime: Runtime.NODEJS_18_X,
   handler: 'main.handler',
+  environment: {
+    dbHost,
+    dbName,
+    dbPassword,
+    dbPort,
+    dbUser,
+  },
 });
 
 const cartApiIntegration = new LambdaIntegration(cartApiLambda, {
