@@ -24,6 +24,7 @@ async function bootstrap() {
 
     app.use(helmet());
     await app.init();
+    await app.listen(port);
 
     cachedServer = serverlessExpress({ app: expressApp });
   }
