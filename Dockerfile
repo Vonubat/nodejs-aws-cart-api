@@ -1,61 +1,32 @@
-###################
-# BUILD FOR LOCAL DEVELOPMENT
-###################
-
-FROM node:18-alpine As development
+FROM node:18-alpine As base
 
 # Create app directory
 WORKDIR /app
 
-# Copy application dependency manifests to the container image.
-# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
-# Copying this first prevents re-running npm install on every code change.
-COPY --chown=node:node package*.json ./
+# Dependencies
+COPY package*.json ./
+RUN npm install
 
-# Install app dependencies using the `npm ci` command instead of `npm install`
-RUN npm ci
-
-# Bundle app source
-COPY --chown=node:node . .
-
-# Use the node user from the image (instead of the root user)
-USER node
-
-###################
-# BUILD FOR PRODUCTION
-###################
-
-FROM node:18-alpine As build
-
+# Build
 WORKDIR /app
-
-COPY --chown=node:node package*.json ./
-
-# In order to run `npm run build` we need access to the Nest CLI which is a dev dependency. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
-COPY --chown=node:node --from=development /app/node_modules ./node_modules
-COPY --chown=node:node . .
-
-# Run the build command which creates the production bundle
+COPY . .
 RUN npm run build
 
-# Set NODE_ENV environment variable
-ENV NODE_ENV production
+# Application
+FROM node:18-alpine as application
 
-# Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
-RUN npm ci --only=production && npm cache clean --force
+COPY --from=base /app/package*.json ./
+RUN npm install --only=production
+COPY --from=base /app/dist ./dist
 
 USER node
+ENV PORT=4000
+ENV DB_PORT=5432
+ENV DB_HOST=cart-api-db.crouiakku3bv.eu-west-1.rds.amazonaws.com
+ENV DB_USER=postgres
+ENV DB_PASSWORD=1234567890
+ENV DB_NAME=DbCartApi
 
-###################
-# PRODUCTION
-###################
+EXPOSE 4000
 
-FROM node:18-alpine As production
-
-# Copy the bundled code from the build stage to the production image
-COPY --chown=node:node --from=build /app/node_modules ./node_modules
-COPY --chown=node:node --from=build /app/dist ./dist
-COPY --chown=node:node --from=build /app/.env ./
-
-# Start the server using the production build
 CMD [ "node", "dist/main.js" ]
